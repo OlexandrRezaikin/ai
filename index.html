@@ -5,429 +5,294 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Pudge Battle 2.5D</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #1a1a1a; font-family: 'Segoe UI', sans-serif; touch-action: none; }
+        body { margin: 0; overflow: hidden; background: #222; font-family: sans-serif; touch-action: none; }
         canvas { display: block; }
-        
-        #ui-layer {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+        #ui {
+            position: absolute; top: 10px; left: 10px; color: white;
+            text-shadow: 1px 1px 2px black; pointer-events: none;
         }
-
-        .hud-top {
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            color: white;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-            font-weight: bold;
-            font-size: 20px;
+        #shop {
+            position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 10px; background: rgba(0,0,0,0.7); padding: 10px; border-radius: 8px;
         }
-
-        .shop {
-            pointer-events: auto;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 15px;
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            border-top: 2px solid #444;
-        }
-
         .item {
-            width: 60px;
-            height: 60px;
-            background: #333;
-            border: 2px solid #666;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 30px;
-            position: relative;
-            transition: transform 0.1s;
+            width: 50px; height: 50px; background: #444; border: 2px solid #888;
+            border-radius: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 24px; position: relative;
         }
-        .item:active { transform: scale(0.95); }
-        .item.owned { border-color: #0f0; box-shadow: 0 0 10px #0f0; }
+        .item:hover { border-color: gold; background: #555; }
+        .item.bought { opacity: 0.5; cursor: default; border-color: #333; }
         .price {
-            position: absolute;
-            bottom: -20px;
-            font-size: 12px;
-            color: #ffd700;
-            width: 100%;
-            text-align: center;
+            position: absolute; bottom: -20px; font-size: 12px; color: gold; white-space: nowrap;
         }
-
+        #controls-hint {
+            position: absolute; top: 10px; right: 10px; color: #aaa; font-size: 12px; text-align: right;
+        }
         #game-over {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            pointer-events: auto;
-            z-index: 100;
-        }
-        button.restart {
-            padding: 15px 40px;
-            font-size: 24px;
-            background: #d32f2f;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-        
-        .controls-hint {
-            position: absolute;
-            bottom: 140px;
-            left: 20px;
-            color: rgba(255,255,255,0.5);
-            font-size: 14px;
-            pointer-events: none;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: red; font-size: 40px; font-weight: bold; display: none;
+            text-shadow: 2px 2px 4px black; background: rgba(0,0,0,0.8); padding: 20px; border-radius: 10px;
         }
     </style>
 </head>
 <body>
 
+<div id="ui">
+    <div>Гравець HP: <span id="hp-player">500</span></div>
+    <div>Бот HP: <span id="hp-bot">500</span></div>
+    <div>Золото: <span id="gold">0</span></div>
+</div>
+
+<div id="controls-hint">WASD - Рух<br>ЛКМ - Гак</div>
+
+<div id="shop">
+    <div class="item" onclick="buyItem('blink')" id="item-blink">
+        👟<div class="price">200</div>
+    </div>
+    <div class="item" onclick="buyItem('force')" id="item-force">
+        🪄<div class="price">350</div>
+    </div>
+    <div class="item" onclick="buyItem('heart')" id="item-heart">
+        ❤️<div class="price">1000</div>
+    </div>
+</div>
+
+<div id="game-over">GAME OVER<br><span style="font-size:20px; color:white">Онови сторінку</span></div>
+
 <canvas id="gameCanvas"></canvas>
 
-<div id="ui-layer">
-    <div class="hud-top">
-        <div id="player-stats">HP: 100% | Gold: 0</div>
-        <div id="bot-stats">Enemy HP: 100%</div>
-    </div>
-    
-    <div class="controls-hint">WASD - Рух | Миша - Приціл | ЛКМ - Гак</div>
-
-    <div class="shop">
-        <div class="item" onclick="buyItem('blink')" id="item-blink">
-            👟<span class="price">300</span>
-        </div>
-        <div class="item" onclick="buyItem('force')" id="item-force">
-            💨<span class="price">500</span>
-        </div>
-        <div class="item" onclick="buyItem('heart')" id="item-heart">
-            ❤️<span class="price">1000</span>
-        </div>
-    </div>
-</div>
-
-<div id="game-over">
-    <h1 id="winner-text">YOU WIN!</h1>
-    <button class="restart" onclick="location.reload()">Грати ще</button>
-</div>
-
 <script>
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
 
-// Налаштування екрану
-function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-}
-window.addEventListener('resize', resize);
-resize();
+    // Налаштування екрану
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
 
-// Ігрові константи
-const RIVER_WIDTH = 120;
-const MOVE_SPEED = 2.5; // Повільний рух
-const HOOK_SPEED = 12;
-const HOOK_RANGE = 600;
-const PUDGE_RADIUS = 25;
+    // Стан гри
+    let gold = 0;
+    let gameOver = false;
+    const riverY = window.innerHeight / 2; // Річка посередині
 
-// Стан гри
-let gold = 0;
-let gameOver = false;
-const keys = { w: false, a: false, s: false, d: false };
-const mouse = { x: 0, y: 0, down: false };
+    // Гравець
+    const player = {
+        x: 100, y: 100, radius: 25, color: '#3498db', speed: 3, hp: 500, maxHp: 500,
+        hookActive: false, hookX: 0, hookY: 0, hookSpeed: 10, cooldown: 0
+    };
 
-// Об'єкти
-class Pudge {
-    constructor(x, y, isBot = false) {
-        this.x = x;
-        this.y = y;
-        this.isBot = isBot;
-        this.hp = 100;
-        this.maxHp = 100;
-        this.angle = isBot ? Math.PI : 0;
-        this.hookCooldown = 0;
-        this.hook = null; // {x, y, state: 'fly'|'pull'|'return'}
-        this.items = [];
-        this.color = isBot ? '#8b0000' : '#2e7d32'; // Темно-червоний vs Зелений
+    // Бот
+    const bot = {
+        x: canvas.width - 100, y: canvas.height - 100, radius: 25, color: '#e74c3c', speed: 2, hp: 500, maxHp: 500,
+        hookActive: false, hookX: 0, hookY: 0, hookSpeed: 8, cooldown: 0, state: 'idle'
+    };
+
+    // Миша
+    const mouse = { x: 0, y: 0 };
+    window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+    window.addEventListener('mousedown', () => throwHook(player));
+
+    // Клавіатура
+    const keys = {};
+    window.addEventListener('keydown', e => keys[e.code] = true);
+    window.addEventListener('keyup', e => keys[e.code] = false);
+
+    // Магазин
+    function buyItem(item) {
+        if (gameOver) return;
+        const el = document.getElementById('item-' + item);
+        if (el.classList.contains('bought')) return;
+
+        if (item === 'blink' && gold >= 200) {
+            gold -= 200; player.speed += 2; el.classList.add('bought');
+        } else if (item === 'force' && gold >= 350) {
+            gold -= 350; player.speed += 1; player.radius += 5; el.classList.add('bought');
+        } else if (item === 'heart' && gold >= 1000) {
+            gold -= 1000; player.maxHp += 500; player.hp = player.maxHp; el.classList.add('bought');
+        }
+        updateUI();
     }
 
-    update() {
-        if (this.hp <= 0) return;
-
-        // Кулдаун гака
-        if (this.hookCooldown > 0) this.hookCooldown--;
-
-        // Логіка бота
-        if (this.isBot) {
-            const dx = player.x - this.x;
-            const dy = player.y - this.y;
-            const dist = Math.sqrt(dx*dx + dy*dy);
-            
-            // Бот тримається своєї сторони річки
-            const riverCenter = canvas.height / 2;
-            let targetY = this.y;
-            if (this.y < riverCenter && dy > 0) targetY = riverCenter - 60; // Триматися зверху
-            if (this.y > riverCenter && dy < 0) targetY = riverCenter + 60; // Триматися знизу
-
-            // Рух до гравця, але не переходити річку
-            if (dist > 200) {
-                this.x += (dx / dist) * MOVE_SPEED;
-                this.y += ((targetY - this.y) / dist) * MOVE_SPEED;
-            } else {
-                // Якщо близько - кидати гак
-                if (this.hookCooldown === 0 && !this.hook) {
-                    this.shootHook(player.x, player.y);
-                }
-            }
-            
-            // Поворот до гравця
-            this.angle = Math.atan2(dy, dx);
-        } else {
-            // Гравець (WASD)
-            let dx = 0, dy = 0;
-            if (keys.w) dy -= 1;
-            if (keys.s) dy += 1;
-            if (keys.a) dx -= 1;
-            if (keys.d) dx += 1;
-
-            if (dx !== 0 || dy !== 0) {
-                const len = Math.sqrt(dx*dx + dy*dy);
-                this.x += (dx/len) * MOVE_SPEED;
-                this.y += (dy/len) * MOVE_SPEED;
-                
-                // Поворот за рухом, якщо не цілимося мишею в атаці
-                if (!this.hook) this.angle = Math.atan2(dy, dx);
-            }
-
-            // Стрільба гаком по миші
-            if (mouse.down && this.hookCooldown === 0 && !this.hook) {
-                this.shootHook(mouse.x, mouse.y);
-                mouse.down = false; // Щоб не стріляв кулеметом
-            }
-            
-            // Поворот корпусу до миші завжди
-            this.angle = Math.atan2(mouse.y - this.y, mouse.x - this.x);
-        }
-
-        // Обмеження карти
-        this.x = Math.max(PUDGE_RADIUS, Math.min(canvas.width - PUDGE_RADIUS, this.x));
-        this.y = Math.max(PUDGE_RADIUS, Math.min(canvas.height - PUDGE_RADIUS, this.y));
-
-        // Перевірка річки (не можна переходити)
-        const riverTop = (canvas.height / 2) - (RIVER_WIDTH / 2);
-        const riverBottom = (canvas.height / 2) + (RIVER_WIDTH / 2);
+    function throwHook(char) {
+        if (char.cooldown > 0 || char.hookActive) return;
+        char.hookActive = true;
         
-        if (this.y > riverTop && this.y < riverBottom) {
-            // Виштовхуємо назад
-            if (this.y < canvas.height/2) this.y = riverTop - PUDGE_RADIUS;
-            else this.y = riverBottom + PUDGE_RADIUS;
+        // Ціль для бота - гравець, для гравця - миша
+        let targetX, targetY;
+        if (char === player) {
+            targetX = mouse.x;
+            targetY = mouse.y;
+        } else {
+            targetX = player.x;
+            targetY = player.y;
         }
+
+        const angle = Math.atan2(targetY - char.y, targetX - char.x);
+        char.hookDir = { x: Math.cos(angle), y: Math.sin(angle) };
+        char.hookX = char.x;
+        char.hookY = char.y;
+        char.cooldown = 60; // 1 секунда при 60 FPS
+    }
+
+    function updatePhysics() {
+        if (gameOver) return;
+
+        // Рух гравця (WASD)
+        let dx = 0, dy = 0;
+        if (keys['KeyW']) dy = -1;
+        if (keys['KeyS']) dy = 1;
+        if (keys['KeyA']) dx = -1;
+        if (keys['KeyD']) dx = 1;
+
+        if (dx !== 0 || dy !== 0) {
+            const len = Math.sqrt(dx*dx + dy*dy);
+            player.x += (dx/len) * player.speed;
+            player.y += (dy/len) * player.speed;
+        }
+
+        // Обмеження карти та річки для гравця (не може перейти на нижню половину)
+        player.x = Math.max(player.radius, Math.min(canvas.width - player.radius, player.x));
+        player.y = Math.max(player.radius, Math.min(riverY - player.radius - 10, player.y)); // Стоп перед річкою
+
+        // Штучний інтелект бота (простий)
+        const distToPlayer = Math.hypot(player.x - bot.x, player.y - bot.y);
+        if (distToPlayer > 300) {
+            // Йти до гравця (але залишатися на своїй половині)
+            const angle = Math.atan2(player.y - bot.y, player.x - bot.x);
+            bot.x += Math.cos(angle) * bot.speed;
+            bot.y += Math.sin(angle) * bot.speed;
+        } else {
+            // Кидати гак якщо близько
+            if (Math.random() < 0.02) throwHook(bot);
+        }
+
+        // Обмеження для бота (верхня половина заборонена)
+        bot.x = Math.max(bot.radius, Math.min(canvas.width - bot.radius, bot.x));
+        bot.y = Math.max(riverY + bot.radius + 10, Math.min(canvas.height - bot.radius, bot.y));
 
         // Логіка гака
-        if (this.hook) {
-            this.updateHook();
-        }
+        [player, bot].forEach(char => {
+            if (char.hookActive) {
+                char.hookX += char.hookDir.x * char.hookSpeed;
+                char.hookY += char.hookDir.y * char.hookSpeed;
+
+                // Перевірка влучання
+                const target = char === player ? bot : player;
+                const dist = Math.hypot(char.hookX - target.x, char.hookY - target.y);
+                
+                if (dist < target.radius + 10) {
+                    // Влучив!
+                    char.hookActive = false;
+                    target.hp -= 50;
+                    updateUI();
+                    if (target.hp <= 0) endGame(char === player);
+                }
+
+                // Якщо гак далеко, повертається
+                if (Math.hypot(char.hookX - char.x, char.hookY - char.y) > 400) {
+                    char.hookActive = false;
+                }
+            }
+            if (char.cooldown > 0) char.cooldown--;
+        });
     }
 
-    shootHook(tx, ty) {
-        const angle = Math.atan2(ty - this.y, tx - this.x);
-        this.hook = {
-            x: this.x,
-            y: this.y,
-            vx: Math.cos(angle) * HOOK_SPEED,
-            vy: Math.sin(angle) * HOOK_SPEED,
-            state: 'fly',
-            target: null
-        };
-        this.hookCooldown = 60; // 1 секунда
-    }
+    function draw() {
+        // Фон (трава)
+        ctx.fillStyle = '#2ecc71';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    updateHook() {
-        const h = this.hook;
-        
-        if (h.state === 'fly') {
-            h.x += h.vx;
-            h.y += h.vy;
+        // Річка
+        ctx.fillStyle = '#3498db';
+        ctx.fillRect(0, riverY - 40, canvas.width, 80);
+        // Береги річки
+        ctx.fillStyle = '#7f8c8d';
+        ctx.fillRect(0, riverY - 45, canvas.width, 5);
+        ctx.fillRect(0, riverY + 40, canvas.width, 5);
 
-            // Відстань польоту
-            const distStart = Math.sqrt((h.x - this.x)**2 + (h.y - this.y)**2);
-            if (distStart > HOOK_RANGE) h.state = 'return';
+        // Малюємо гравця (Пудж)
+        drawPudge(player.x, player.y, player.color, player.radius);
+        if (player.hookActive) drawHook(player.hookX, player.hookY);
 
-            // Колізія з ворогом
-            const enemy = this.isBot ? player : bot;
-            const dx = h.x - enemy.x;
-            const dy = h.y - enemy.y;
-            if (Math.sqrt(dx*dx + dy*dy) < PUDGE_RADIUS + 10) {
-                h.state = 'pull';
-                h.target = enemy;
-            }
-        } 
-        else if (h.state === 'pull') {
-            // Тягнемо ворога до себе
-            const angle = Math.atan2(this.y - h.target.y, this.x - h.target.x);
-            h.target.x += Math.cos(angle) * 8;
-            h.target.y += Math.sin(angle) * 8;
-            h.x = h.target.x;
-            h.y = h.target.y;
+        // Малюємо бота
+        drawPudge(bot.x, bot.y, bot.color, bot.radius);
+        if (bot.hookActive) drawHook(bot.hookX, bot.hookY);
 
-            // Завдаємо шкоди при зіткненні
-            const dist = Math.sqrt((this.x - h.target.x)**2 + (this.y - h.target.y)**2);
-            if (dist < PUDGE_RADIUS) {
-                h.target.hp -= 2;
-                if(h.target.hp <= 0) endGame(this.isBot ? "BOT" : "PLAYER");
-            }
-
-            // Якщо дотягли до себе - повертаємо гак
-            if (dist < 10) h.state = 'return';
-        }
-        else if (h.state === 'return') {
-            // Повернення гака
-            const angle = Math.atan2(this.y - h.x, this.x - h.x); // Помилка в логіці, виправляємо вектор до гравця
-            const dx = this.x - h.x;
-            const dy = this.y - h.y;
-            const dist = Math.sqrt(dx*dx + dy*dy);
-            
-            if (dist < 10) {
-                this.hook = null;
-            } else {
-                h.x += (dx/dist) * HOOK_SPEED * 1.5;
-                h.y += (dy/dist) * HOOK_SPEED * 1.5;
-            }
-        }
-    }
-
-    draw() {
-        ctx.save();
-        ctx.translate(this.x, this.y);
-        ctx.rotate(this.angle);
-
-        // Тіло (вид зверху - коло з деталями)
-        ctx.fillStyle = this.color;
-        ctx.beginPath();
-        ctx.arc(0, 0, PUDGE_RADIUS, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = '#000';
+        // Приціл миші
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
         ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(mouse.x, mouse.y, 10, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(mouse.x - 15, mouse.y); ctx.lineTo(mouse.x + 15, mouse.y);
+        ctx.moveTo(mouse.x, mouse.y - 15); ctx.lineTo(mouse.x, mouse.y + 15);
         ctx.stroke();
 
-        // Плечі/Руки
-        ctx.fillStyle = '#5d4037'; // Шкіра
-        ctx.beginPath();
-        ctx.arc(10, -15, 12, 0, Math.PI * 2); // Ліве плече
-        ctx.arc(10, 15, 12, 0, Math.PI * 2);  // Праве плече
-        ctx.fill();
-        ctx.stroke();
-
-        // Голова
-        ctx.fillStyle = '#8d6e63';
-        ctx.beginPath();
-        ctx.arc(15, 0, 18, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-
-        // Очі
-        ctx.fillStyle = '#fff';
-        ctx.beginPath();
-        ctx.arc(20, -8, 4, 0, Math.PI * 2);
-        ctx.arc(20, 8, 4, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = '#f00'; // Червоні зіниці
-        ctx.beginPath();
-        ctx.arc(22, -8, 2, 0, Math.PI * 2);
-        ctx.arc(22, 8, 2, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Гак (якщо є)
-        if (this.hook) {
-            // Малюємо ланцюг від руки до гака
-            ctx.strokeStyle = '#555';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(15, 15); // Від правої руки
-            ctx.lineTo(this.hook.x - this.x, this.hook.y - this.y);
-            ctx.stroke();
-
-            // Сам гак
-            ctx.fillStyle = '#aaa';
-            ctx.beginPath();
-            ctx.arc(this.hook.x - this.x, this.hook.y - this.y, 8, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = '#fff';
-            ctx.stroke();
-        } else {
-            // Рука з гаком в спокої
-            ctx.fillStyle = '#aaa';
-            ctx.beginPath();
-            ctx.arc(25, 20, 6, 0, Math.PI * 2);
-            ctx.fill();
-        }
-
-        ctx.restore();
-
-        // HP Bar над головою
-        const hpPercent = this.hp / this.maxHp;
-        ctx.fillStyle = '#333';
-        ctx.fillRect(this.x - 30, this.y - 50, 60, 8);
-        ctx.fillStyle = hpPercent > 0.5 ? '#0f0' : '#f00';
-        ctx.fillRect(this.x - 30, this.y - 50, 60 * hpPercent, 8);
+        requestAnimationFrame(loop);
     }
-}
 
-// Ініціалізація
-let player, bot;
-
-function initGame() {
-    player = new Pudge(100, canvas.height / 2 + 100);
-    bot = new Pudge(canvas.width - 100, canvas.height / 2 - 100, true);
-    gameOver = false;
-    document.getElementById('game-over').style.display = 'none';
-}
-
-function endGame(winner) {
-    gameOver = true;
-    const screen = document.getElementById('game-over');
-    const text = document.getElementById('winner-text');
-    screen.style.display = 'flex';
-    text.textContent = winner === "PLAYER" ? "ТИ ПЕРЕМІГ! (+500 Gold)" : "БОТ ПЕРЕМІГ!";
-    text.style.color = winner === "PLAYER" ? "#4caf50" : "#f44336";
-    
-    if (winner === "PLAYER") {
-        gold += 500;
-        updateUI();
-    }
-}
-
-// Магазин
-window.buyItem = function(item) {
-    if (gameOver) return;
-    const prices = { 'blink': 300, 'force': 500, 'heart': 1000 };
-    if (gold >= prices[item] && !player.items.includes(item)) {
-        gold -= prices[item];
-        player.items.push(item);
+    function drawPudge(x, y, color, r) {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2); // Тіло
+        ctx.fill();
         
-        if (item === 'heart') {
-            player.maxHp += 200;
-            player.hp += 200;
-        }
-        
-        document.getElementById(`item-${item}`).classList.add('owned');
-        updateUI();
-    }
-};
+        ctx.fillStyle = '#5a3e2b'; // Шкіра обличчя
+        ctx.beginPath();
+        ctx.arc(x, y - r/3, r/1.5, 0, Math.PI * 2);
+        ctx.fill();
 
-function updateUI() {
-    document.getElementById('player-stats').textContent = `HP: ${Math.floor(player.hp)}/${player.maxHp} | Gold: ${gold
+        ctx.fillStyle = 'white'; // Очі
+        ctx.beginPath();
+        ctx.arc(x - r/3, y - r/2, r/6, 0, Math.PI * 2);
+        ctx.arc(x + r/3, y - r/2, r/6, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.fillStyle = 'black'; // зіниці
+        ctx.beginPath();
+        ctx.arc(x - r/3, y - r/2, r/12, 0, Math.PI * 2);
+        ctx.arc(x + r/3, y - r/2, r/12, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    function drawHook(x, y) {
+        ctx.fillStyle = '#95a5a6';
+        ctx.beginPath();
+        ctx.arc(x, y, 10, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#7f8c8d';
+        ctx.lineWidth = 4;
+        ctx.stroke();
+    }
+
+    function updateUI() {
+        document.getElementById('hp-player').innerText = Math.floor(player.hp);
+        document.getElementById('hp-bot').innerText = Math.floor(bot.hp);
+        document.getElementById('gold').innerText = gold;
+    }
+
+    function endGame(playerWin) {
+        gameOver = true;
+        const msg = document.getElementById('game-over');
+        msg.style.display = 'block';
+        msg.innerHTML = playerWin ? '<span style="color:green">ПЕРЕМОГА!</span><br>+500 Gold' : '<span style="color:red">ПОРАЗКА</span>';
+        if (playerWin) {
+            gold += 500;
+            updateUI();
+        }
+    }
+
+    function loop() {
+        updatePhysics();
+        draw();
+    }
+
+    // Старт
+    loop();
+</script>
+</body>
+</html>
