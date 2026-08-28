@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pudge Hook Battle</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            touch-action: none;
+            color: #fff;
+        }
+        
+        #gameCanvas {
+            display: block;
+            margin: 0 auto;
+            background: #2d3436;
+            border: 3px solid #4a4a4a;
+            border-radius: 8px;
+        }
+        
+        #ui {
+            position: absolute;
+            top: 10px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            pointer-events: none;
+        }
+        
+        .health-bar {
+            width: 200px;
+            height: 25px;
+            background: #333;
+            border: 2px solid #000;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .health-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff4444, #cc0000);
+            transition: width 0.3s ease;
+        }
+        
+        .health-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px #000;
+        }
+        
+        #shop {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #gold;
+        }
+        
+        .shop-item {
+            width: 70px;
+            height: 70px;
+            background: #444;
+            border: 2px solid #666;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            text-align: center;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .shop-item:hover {
+            transform: scale(1.1);
+            border-color: #ffd700;
+        }
+        
+        .shop-item.owned {
+            border-color: #00ff00;
+            background: #2d5a2d;
+        }
+        
+        .shop-item img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            margin-bottom: 5px;
+        }
+        
+        .item-price {
+            color: #ffd700;
+            font-weight: bold;
+        }
+        
+        .item-name {
+            font-size: 9px;
+            color: #fff;
+        }
+        
+        #score {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px #000;
+        }
+        
+        #controls {
+            position: absolute;
+            bottom: 120px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .control-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            background: rgba(255, 0, 0, 0.7);
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.1s;
+        }
+        
+        .control-btn:active {
+            transform: scale(0.9);
+            background: rgba(255, 0, 0, 0.9);
+        }
+        
+        #hookBtn {
+            background: rgba(255, 165, 0, 0.7);
+        }
+        
+        #message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            font-weight: bold;
+            text-shadow: 3px 3px 6px #000;
+            display: none;
+            z-index: 100;
+        }
+        
+        .victory { color: #ffd700; }
+        .defeat { color: #ff4444; }
+        
+        #restartBtn {
+            position: absolute;
+            top: 60%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 30px;
+            font-size: 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: none;
+            z-index: 101;
+        }
+        
+        #restartBtn:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    
+    <div id="ui">
+        <div class="health-bar">
+            <div class="health-fill" id="playerHealth" style="width: 100%;"></div>
+            <div class="health-text" id="playerHealthText">500/500</div>
+        </div>
+        <div class="health-bar">
+            <div class="health-fill" id="botHealth" style="width: 100%;"></div>
+            <div class="health-text" id="botHealthText">500/500</div>
+        </div>
+    </div>
+    
+    <div id="score">Гравець: 0 | Бот: 0</div>
+    
+    <div id="shop">
+        <div class="shop-item" onclick="buyItem('blink')">
+            <div style="font-size: 24px;">⚡</div>
+            <div class="item-name">Blink</div>
+            <div class="item-price">2200</div>
+        </div>
+        <div class="shop-item" onclick="buyItem('force')">
+            <div style="font-size: 24px;">💨</div>
+            <div class="item-name">Force</div>
+            <div class="item-price">2250</div>
+        </div>
+        <div class="shop-item" onclick="buyItem('heart')">
+            <div style="font-size: 24px;">❤️</div>
+            <div class="item-name">Heart</div>
+            <div class="item-price">5200</div>
+        </div>
+    </div>
+    
+    <div id="controls">
+        <div class="control-btn" id="hookBtn" ontouchstart="throwHook()" onclick="throwHook()">HOOK</div>
+        <div class="control-btn" ontouchstart="moveLeft()" onmousedown="moveLeft()">←</div>
+        <div class="control-btn" ontouchstart="moveRight()" onmousedown="moveRight()">→</div>
+    </div>
+    
+    <div id="message"></div>
+    <button id="restartBtn" onclick="restartGame()">ГРАТИ ЗНОВУ</button>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+        
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Налаштування розмірів
+        function resizeCanvas() {
+            const maxWidth = Math.min(window.innerWidth - 40, 800);
+            const maxHeight = window.innerHeight - 200;
+            canvas.width = maxWidth;
+            canvas.height = Math.min(500, maxHeight);
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        // Ігрові змінні
+        let playerScore = 0;
+        let botScore = 0;
+        let gameActive = true;
+        let gold = 0;
+        let items = { blink: false, force: false, heart: false };
+        
+        // Клас Pudge
+        class Pudge {
+            constructor(x, y, isPlayer) {
+                this.x = x;
+                this.y = y;
+                this.isPlayer = isPlayer;
+                this.width = 60;
+                this.height = 80;
+                this.health = 500;
+                this.maxHealth = 500;
+                this.speed = 3;
+                this.hookCooldown = 0;
+                this.hookActive = false;
+                this.hookX = x;
+                this.hookY = y;
+                this.hookTargetX = null;
+                this.hookTargetY = null;
+                this.direction = isPlayer ? 1 : -1;
+                this.color = isPlayer ? '#4CAF50' : '#f44336';
+                this.faceColor = '#8B4513';
+            }
+            
+            draw() {
+                // Тіло
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.ellipse(this.x, this.y + 20, 30, 40, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Голова
+                ctx.fillStyle = this.faceColor;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y - 30, 25, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Очі
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(this.x - 8, this.y - 35, 6, 0, Math.PI * 2);
+                ctx.arc(this.x + 8, this.y - 35, 6, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = '#000';
+                ctx.beginPath();
+                ctx.arc(this.x - 6, this.y - 35, 3, 0, Math.PI * 2);
+                ctx.arc(this.x + 10, this.y - 35, 3, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Рот
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                if (this.isPlayer) {
+                    ctx.arc(this.x, this.y - 20, 10, 0, Math.PI, false);
+                } else {
+                    ctx.arc(this.x, this.y - 20, 10, 0, Math.PI, true);
+                }
+                ctx.stroke();
+                
+                // Руки
+                ctx.fillStyle = this.faceColor;
+                ctx.beginPath();
+                ctx.ellipse(this.x - 25, this.y + 10, 8, 20, -0.3, 0, Math.PI * 2);
+                ctx.ellipse(this.x + 25, this.y + 10, 8, 20, 0.3, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Гак (якщо активний)
+                if (this.hookActive && this.hookTargetX !== null) {
+                    ctx.strokeStyle = '#888';
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.moveTo(this.x, this.y + 10);
+                    ctx.lineTo(this.hookX, this.hookY);
+                    ctx.stroke();
+                    
+                    // Лезо гака
+                    ctx.fillStyle = '#silver';
+                    ctx.beginPath();
+                    ctx.arc(this.hookX, this.hookY, 8, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.strokeStyle = '#555';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.arc(this.hookX, this.hookY, 8, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+            }
+            
+            update() {
+                if (this.hookActive && this.hookTargetX !== null) {
+                    const dx = this.hookTargetX - this.hookX;
+                    const dy = this.hookTargetY - this.hookY;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist > 5) {
+                        this.hookX += (dx / dist) * 15;
+                        this.hookY += (dy / dist) * 15;
+                    } else {
+                        // Перевірка влучання
+                        const target = this.isPlayer ? bot : player;
+                        const hookDist = Math.sqrt(
+                            Math.pow(this.hookX - target.x, 2) + 
+                            Math.pow(this.hookY - target.y, 2)
+                        );
+                        
+                        if (hookDist < 40) {
+                            // Влучив!
+                            target.health -= 150;
+                            updateHealthBars();
+                            
+                            // Тягнемо ворога до себе
+                            const pullDir = this.isPlayer ? 1 : -1;
+                            target.x += pullDir * 100;
+                            
+                            if (target.health <= 0) {
+                                endRound(this.isPlayer);
+                            }
+                        }
+                        
+                        this.hookActive = false;
+                        this.hookCooldown = 60;
+                    }
+                }
+                
+                if (this.hookCooldown > 0) this.hookCooldown--;
+                
+                // Обмеження по екрану
+                this.x = Math.max(30, Math.min(canvas.width - 30, this.x));
+            }
+        }
+        
+        let player = new Pudge(100, canvas.height / 2, true);
+        let bot = new Pudge(canvas.width - 100, canvas.height / 2, false);
+        
+        function updateHealthBars() {
+            const playerPercent = (player.health / player.maxHealth) * 100;
+            const botPercent = (bot.health / bot.maxHealth) * 100;
+            
+            document.getElementById('playerHealth').style.width = `${Math.max(0, playerPercent)}%`;
+            document.getElementById('botHealth').style.width = `${Math.max(0, botPercent)}%`;
+            
+            document.getElementById('playerHealthText').textContent = 
+                `${Math.max(0, player.health)}/${player.maxHealth}`;
+            document.getElementById('botHealthText').textContent = 
+                `${Math.max(0, bot.health)}/${bot.maxHealth}`;
+        }
+        
+        function throwHook() {
+            if (!gameActive || player.hookCooldown > 0) return;
+            
+            player.hookActive = true;
+            player.hookX = player.x;
+            player.hookY = player.y + 10;
+            player.hookTargetX = bot.x;
+            player.hookTargetY = bot.y;
+        }
+        
+        function moveLeft() {
+            if (!gameActive) return;
+            player.x -= player.speed * 3;
+        }
+        
+        function moveRight() {
+            if (!gameActive) return;
+            player.x += player.speed * 3;
+        }
+        
+        // ШІ бота
+        let botMoveTimer = 0;
+        let botMoveDirection = 1;
+        
+        function updateBot() {
+            if (!gameActive) return;
+            
+            botMoveTimer++;
+            if (botMoveTimer > 30) {
+                botMoveTimer = 0;
+                botMoveDirection = Math.random() > 0.5 ? 1 : -1;
+                
+                // Спроба кинути гак
+                if (bot.hookCooldown === 0 && Math.random() > 0.7) {
+                    bot.hookActive = true;
+                    bot.hookX = bot.x;
+                    bot.hookY = bot.y + 10;
+                    bot.hookTargetX = player.x;
+                    bot.hookTargetY = player.y;
+                }
+            }
+            
+            bot.x += botMoveDirection * bot.speed;
+            bot.update();
+        }
+        
+        function buyItem(item) {
+            if (items[item]) return; // Вже куплено
+            
+            const prices = { blink: 2200, force: 2250, heart: 5200 };
+            if (gold >= prices[item]) {
+                gold -= prices[item];
+                items[item] = true;
+                
+                // Ефект покупки
+                if (item === 'heart') {
+                    player.maxHealth += 300;
+                    player.health += 300;
+                    updateHealthBars();
+                }
+                
+                // Оновлення вигляту магазину
+                document.querySelectorAll('.shop-item').forEach((el, index) => {
+                    const itemNames = ['blink', 'force', 'heart'];
+                    if (items[itemNames[index]]) {
+                        el.classList.add('owned');
+                        el.querySelector('.item-price').textContent = 'КУПЛЕНО';
+                    }
+                });
+            }
+        }
+        
+        function endRound(playerWon) {
+            gameActive = false;
+            
+            if (playerWon) {
+                playerScore++;
+                gold += 500;
+                showMessage("ПЕРЕМОГА!", "victory");
+            } else {
+                botScore++;
+                showMessage("ПОРАЗКА", "defeat");
+            }
+            
+            document.getElementById('score').textContent = 
+                `Гравець: ${playerScore} | Бот: ${botScore}`;
+            
+            document.getElementById('restartBtn').style.display = 'block';
+        }
+        
+        function showMessage(text, className) {
+            const msg = document.getElementById('message');
+            msg.textContent = text;
+            msg.className = className;
+            msg.style.display = 'block';
+        }
+        
+        function restartGame() {
+            player = new Pudge(100, canvas.height / 2, true);
+            bot = new Pudge(canvas.width - 100, canvas.height / 2, false);
+            
+            // Зберігаємо предмети та золото
+            if (items.heart) {
+                player.maxHealth = 800;
+                player.health = 800;
+            }
+            
+            gameActive = true;
+            document.getElementById('message').style.display = 'none';
+            document.getElementById('restartBtn').style.display = 'none';
+            updateHealthBars();
+        }
+        
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Малюємо арену
+            ctx.fillStyle = '#3a3a3a';
+            ctx.fillRect(0, canvas.height - 20, canvas.width, 20);
+            
+            player.update();
+            player.draw();
+            
+            updateBot();
+            bot.draw();
+            
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Запуск гри
+        updateHealthBars();
+        gameLoop();
+        
+        // Підтримка клавіатури
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') moveLeft();
+            if (e.key === 'ArrowRight') moveRight();
+            if (e.key === ' ' || e.key === 'Enter') throwHook();
+        });
+    </script>
+</body>
+</html>
