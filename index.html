@@ -13,7 +13,6 @@
             background-color: #1a1a1a;
             font-family: 'Roboto Condensed', sans-serif;
             user-select: none;
-            -webkit-user-select: none;
         }
 
         #gameCanvas {
@@ -35,81 +34,70 @@
         }
 
         /* Top HUD */
-        .top-hud {
+        .hud-top {
             display: flex;
             justify-content: space-between;
             padding: 20px;
-            pointer-events: auto;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
         }
 
         .hero-stats {
-            background: rgba(0, 0, 0, 0.8);
-            border: 2px solid #4a4a4a;
+            display: flex;
+            gap: 20px;
+            color: #fff;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .stat-box {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #444;
             border-radius: 4px;
             padding: 10px 20px;
-            color: #fff;
-            min-width: 200px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .hero-name {
-            font-size: 18px;
-            color: #ffcc00;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-            text-shadow: 1px 1px 0 #000;
-        }
-
-        .bar-container {
-            height: 12px;
+        .hp-bar-bg {
+            width: 150px;
+            height: 20px;
             background: #333;
-            margin-bottom: 4px;
             border: 1px solid #000;
             position: relative;
         }
 
-        .hp-bar {
+        .hp-bar-fill {
             height: 100%;
-            background: linear-gradient(90deg, #590f0f, #c92b2b);
+            background: linear-gradient(90deg, #ff3333, #aa0000);
             width: 100%;
             transition: width 0.2s;
         }
 
         .gold-display {
             color: #ffd700;
-            font-size: 16px;
-            margin-top: 5px;
-            text-shadow: 1px 1px 0 #000;
-        }
-
-        .score-board {
-            background: rgba(0, 0, 0, 0.8);
-            border: 2px solid #4a4a4a;
-            color: #fff;
-            padding: 10px 20px;
             font-size: 24px;
-            border-radius: 4px;
-            text-align: center;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
         /* Shop */
         .shop-container {
             pointer-events: auto;
-            background: rgba(15, 15, 15, 0.95);
-            border-top: 3px solid #8b5a2b;
+            background: rgba(10, 10, 12, 0.95);
+            border-top: 2px solid #5a4a35;
             padding: 15px;
             display: flex;
-            gap: 15px;
             justify-content: center;
-            align-items: flex-end;
+            gap: 15px;
             backdrop-filter: blur(5px);
         }
 
         .shop-item {
-            width: 70px;
-            height: 70px;
+            width: 80px;
+            height: 80px;
             background: #2a2a2a;
-            border: 2px solid #555;
+            border: 2px solid #444;
             border-radius: 4px;
             position: relative;
             cursor: pointer;
@@ -126,121 +114,56 @@
             background: #333;
         }
 
-        .shop-item.owned {
-            border-color: #00ff00;
-            opacity: 0.7;
-            cursor: default;
-        }
-        
-        .shop-item.owned:hover {
-            transform: none;
+        .shop-item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            filter: grayscale(1);
         }
 
         .item-icon {
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             margin-bottom: 5px;
         }
 
         .item-price {
             color: #ffd700;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: bold;
         }
 
         .item-name {
-            position: absolute;
-            bottom: -25px;
-            background: rgba(0,0,0,0.8);
-            color: #fff;
+            color: #ccc;
             font-size: 10px;
-            padding: 2px 5px;
-            border-radius: 2px;
-            white-space: nowrap;
-            opacity: 0;
-            transition: opacity 0.2s;
-            pointer-events: none;
-        }
-
-        .shop-item:hover .item-name {
-            opacity: 1;
-        }
-
-        /* Controls Hint */
-        .controls-hint {
+            text-align: center;
             position: absolute;
-            top: 50%;
+            bottom: 2px;
+        }
+
+        /* Messages */
+        #message-area {
+            position: absolute;
+            top: 20%;
             left: 50%;
-            transform: translate(-50%, -50%);
-            color: rgba(255,255,255,0.3);
-            font-size: 40px;
+            transform: translateX(-50%);
+            font-size: 48px;
+            color: #ff3333;
+            text-shadow: 3px 3px 0 #000;
+            opacity: 0;
+            transition: opacity 0.5s;
             font-weight: bold;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        /* Mobile Controls */
-        .mobile-controls {
-            display: none; /* Hidden on desktop by default */
-            position: absolute;
-            bottom: 140px;
-            left: 20px;
-            pointer-events: auto;
-        }
-        
-        @media (hover: none) and (pointer: coarse) {
-            .mobile-controls { display: block; }
-            .shop-container { padding-bottom: 20px; }
-        }
-
-        .d-pad {
-            position: relative;
-            width: 120px;
-            height: 120px;
-        }
-        
-        .d-btn {
-            position: absolute;
-            width: 40px;
-            height: 40px;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-size: 20px;
-            user-select: none;
-        }
-        .d-btn:active { background: rgba(255,255,255,0.3); }
-        .d-up { top: 0; left: 40px; }
-        .d-down { bottom: 0; left: 40px; }
-        .d-left { top: 40px; left: 0; }
-        .d-right { top: 40px; right: 0; }
-
-        #hook-btn-mobile {
-            position: absolute;
-            bottom: 140px;
-            right: 20px;
-            width: 80px;
-            height: 80px;
-            background: rgba(180, 0, 0, 0.6);
-            border: 2px solid #ff4444;
-            border-radius: 50%;
-            color: white;
-            font-weight: bold;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            pointer-events: auto;
-            font-size: 14px;
             text-transform: uppercase;
         }
-        @media (hover: none) and (pointer: coarse) {
-            #hook-btn-mobile { display: flex; }
-        }
 
+        /* Controls hint */
+        .controls-hint {
+            position: absolute;
+            bottom: 180px;
+            right: 20px;
+            color: rgba(255,255,255,0.5);
+            font-size: 12px;
+            text-align: right;
+        }
     </style>
 </head>
 <body>
@@ -248,40 +171,81 @@
 <canvas id="gameCanvas"></canvas>
 
 <div id="ui-layer">
-    <div class="controls-hint">WASD + MOUSE</div>
-
-    <div class="top-hud">
+    <div class="hud-top">
         <div class="hero-stats">
-            <div class="hero-name">Pudge (You)</div>
-            <div class="bar-container"><div class="hp-bar" id="playerHp"></div></div>
-            <div class="gold-display">Gold: <span id="playerGold">0</span></div>
+            <div class="stat-box">
+                <span style="color:#ff5555; font-weight:bold;">HP</span>
+                <div class="hp-bar-bg">
+                    <div class="hp-bar-fill" id="playerHp"></div>
+                </div>
+            </div>
+            <div class="stat-box">
+                <span>KILLS: <span id="killScore" style="color:#fff">0</span></span>
+            </div>
         </div>
-        <div class="score-board">
-            Kills: <span id="scoreVal" style="color:#0f0">0</span>
+        <div class="gold-display">
+            <span>💰</span> <span id="goldAmount">0</span>
         </div>
     </div>
 
-    <div class="mobile-controls">
-        <div class="d-pad">
-            <div class="d-btn d-up" data-key="w">↑</div>
-            <div class="d-btn d-down" data-key="s">↓</div>
-            <div class="d-btn d-left" data-key="a">←</div>
-            <div class="d-btn d-right" data-key="d">→</div>
-        </div>
-    </div>
-    <div id="hook-btn-mobile">HOOK</div>
+    <div id="message-area">FIRST BLOOD!</div>
+
+    <div class="controls-hint">WASD - Рух | ЛКМ - Гак</div>
 
     <div class="shop-container">
-        <!-- Items will be injected by JS -->
+        <!-- Blink Dagger -->
+        <div class="shop-item" onclick="buyItem('blink')" id="btn-blink">
+            <svg class="item-icon" viewBox="0 0 100 100">
+                <path d="M50 10 L80 40 L60 40 L60 90 L40 90 L40 40 L20 40 Z" fill="#aaddff" stroke="#fff" stroke-width="2"/>
+                <circle cx="50" cy="25" r="5" fill="#fff"/>
+            </svg>
+            <span class="item-price">2200</span>
+            <span class="item-name">BLINK</span>
+        </div>
+        <!-- Force Staff -->
+        <div class="shop-item" onclick="buyItem('force')" id="btn-force">
+            <svg class="item-icon" viewBox="0 0 100 100">
+                <rect x="45" y="20" width="10" height="60" fill="#dd8844" stroke="#fff" stroke-width="2"/>
+                <circle cx="50" cy="20" r="8" fill="#aa4422" stroke="#fff" stroke-width="2"/>
+                <path d="M30 80 L70 80 L50 95 Z" fill="#dd8844"/>
+            </svg>
+            <span class="item-price">2250</span>
+            <span class="item-name">FORCE</span>
+        </div>
+        <!-- Heart of Tarrasque -->
+        <div class="shop-item" onclick="buyItem('heart')" id="btn-heart">
+            <svg class="item-icon" viewBox="0 0 100 100">
+                <path d="M50 90 C20 60 10 40 10 25 A15 15 0 0 1 40 25 C50 40 50 40 60 25 A15 15 0 0 1 90 25 C90 40 80 60 50 90" fill="#aa0000" stroke="#ff5555" stroke-width="2"/>
+                <path d="M35 30 Q50 50 65 30" fill="none" stroke="#ff8888" stroke-width="3"/>
+            </svg>
+            <span class="item-price">5000</span>
+            <span class="item-name">HEART</span>
+        </div>
     </div>
 </div>
 
 <script>
 /**
- * GAME ENGINE & LOGIC
+ * PUDGE 2.5D ENGINE
+ * Pure JS Canvas Implementation
  */
+
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+
+// Game State
+let lastTime = 0;
+const keys = {};
+const mouse = { x: 0, y: 0, down: false };
+let gold = 600; // Start gold
+let kills = 0;
+let gameMessageTimer = 0;
+
+// Config
+const MAP_WIDTH = 1200;
+const MAP_HEIGHT = 800;
+const RIVER_Y_START = MAP_HEIGHT / 2 - 60;
+const RIVER_Y_END = MAP_HEIGHT / 2 + 60;
 
 // Resize handling
 function resize() {
@@ -291,39 +255,12 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
-// Game Constants
-const MAP_WIDTH = 1200;
-const MAP_HEIGHT = 800;
-const RIVER_Y = MAP_HEIGHT / 2 - 40;
-const RIVER_H = 80;
-const PLAYER_RADIUS = 25;
-const HOOK_SPEED = 12;
-const HOOK_RANGE = 600;
-const MOVE_SPEED_BASE = 2.5;
-
-// Assets / Colors
-const COLORS = {
-    skin: '#5d8a66', // Greenish flesh
-    apron: '#3e2723', // Dark leather
-    metal: '#78909c', // Rusty metal
-    glow: '#ffaa00',
-    river: '#29b6f6',
-    grass: '#1b2618',
-    grassDark: '#131c11'
-};
-
-// Input State
-const keys = { w: false, a: false, s: false, d: false };
-const mouse = { x: 0, y: 0, down: false };
-
-window.addEventListener('keydown', e => { if(keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key.toLowerCase()] = true; });
-window.addEventListener('keyup', e => { if(keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key.toLowerCase()] = false; });
+// Input Handling
+window.addEventListener('keydown', e => keys[e.code] = true);
+window.addEventListener('keyup', e => keys[e.code] = false);
 window.addEventListener('mousemove', e => {
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    mouse.x = (e.clientX - rect.left) * scaleX;
-    mouse.y = (e.clientY - rect.top) * scaleY;
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
 });
 window.addEventListener('mousedown', () => {
     mouse.down = true;
@@ -331,204 +268,195 @@ window.addEventListener('mousedown', () => {
 });
 window.addEventListener('mouseup', () => mouse.down = false);
 
-// Mobile Controls
-document.querySelectorAll('.d-btn').forEach(btn => {
-    btn.addEventListener('touchstart', (e) => { e.preventDefault(); keys[btn.dataset.key] = true; });
-    btn.addEventListener('touchend', (e) => { e.preventDefault(); keys[btn.dataset.key] = false; });
-});
-document.getElementById('hook-btn-mobile').addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    player.tryHook();
-});
+// Utils
+function checkRectCollide(x, y, size, rect) {
+    return x > rect.x && x < rect.x + rect.w && y > rect.y && y < rect.y + rect.h;
+}
 
-// Classes
-class Entity {
+function getDist(x1, y1, x2, y2) {
+    return Math.sqrt((x2-x1)**2 + (y2-y1)**2);
+}
+
+// --- CLASSES ---
+
+class Particle {
+    constructor(x, y, color, speed, life) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.angle = Math.random() * Math.PI * 2;
+        this.speed = Math.random() * speed;
+        this.life = life;
+        this.maxLife = life;
+        this.size = Math.random() * 4 + 2;
+    }
+    update(dt) {
+        this.x += Math.cos(this.angle) * this.speed;
+        this.y += Math.sin(this.angle) * this.speed;
+        this.life -= dt;
+        this.size *= 0.95;
+    }
+    draw(ctx, camX, camY) {
+        ctx.globalAlpha = this.life / this.maxLife;
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x - camX, this.y - camY, this.size, 0, Math.PI*2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+    }
+}
+
+class Hook {
+    constructor(owner) {
+        this.owner = owner;
+        this.active = false;
+        this.x = 0;
+        this.y = 0;
+        this.targetX = 0;
+        this.targetY = 0;
+        this.speed = 1200;
+        this.returning = false;
+        this.hitTarget = null;
+    }
+
+    fire(startX, startY, aimX, aimY) {
+        this.active = true;
+        this.returning = false;
+        this.x = startX;
+        this.y = startY;
+        
+        const angle = Math.atan2(aimY - startY, aimX - startX);
+        this.targetX = startX + Math.cos(angle) * 900; // Max range
+        this.targetY = startY + Math.sin(angle) * 900;
+        this.vx = Math.cos(angle) * this.speed;
+        this.vy = Math.sin(angle) * this.speed;
+        this.hitTarget = null;
+    }
+
+    update(dt, enemy) {
+        if (!this.active) return;
+
+        if (!this.returning) {
+            // Moving out
+            this.x += this.vx * dt;
+            this.y += this.vy * dt;
+
+            // Check collision with enemy
+            const dist = getDist(this.x, this.y, enemy.x, enemy.y);
+            if (dist < enemy.radius + 10) {
+                this.hitTarget = enemy;
+                this.returning = true;
+                // Slow down hook when hitting
+                this.vx *= 0.3;
+                this.vy *= 0.3;
+                
+                // Blood particles
+                for(let i=0; i<10; i++) {
+                    particles.push(new Particle(enemy.x, enemy.y, '#aa0000', 5, 0.5));
+                }
+            }
+
+            // Check max distance
+            const distStart = getDist(this.x, this.y, this.owner.x, this.owner.y);
+            if (distStart > 900 || (this.hitTarget && getDist(this.x, this.y, this.owner.x, this.owner.y) < 50)) {
+                this.returning = true;
+            }
+        } else {
+            // Returning
+            const dx = this.owner.x - this.x;
+            const dy = this.owner.y - this.y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            
+            if (dist < 20) {
+                this.active = false;
+                this.hitTarget = null;
+                return;
+            }
+
+            const moveSpeed = 1500;
+            this.x += (dx / dist) * moveSpeed * dt;
+            this.y += (dy / dist) * moveSpeed * dt;
+
+            // Drag enemy
+            if (this.hitTarget) {
+                this.hitTarget.x = this.x;
+                this.hitTarget.y = this.y;
+                this.hitTarget.takeDamage(10 * dt); // Damage over time while dragging
+                
+                // If pulled close enough, deal burst damage and stun briefly
+                if (dist < 60) {
+                     // Logic handled in main loop for simplicity or here
+                }
+            }
+        }
+    }
+
+    draw(ctx, camX, camY) {
+        if (!this.active) return;
+
+        const screenX = this.x - camX;
+        const screenY = this.y - camY;
+
+        // Draw Chain
+        ctx.beginPath();
+        ctx.moveTo(this.owner.x - camX, this.owner.y - camY + 10); // From hand
+        
+        // Curve logic for chain
+        const midX = (this.owner.x + this.x) / 2;
+        const midY = (this.owner.y + this.y) / 2;
+        
+        ctx.quadraticCurveTo(midX, midY, screenX, screenY);
+        ctx.strokeStyle = '#555';
+        ctx.lineWidth = 4;
+        ctx.setLineDash([5, 5]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Draw Hook Head
+        ctx.save();
+        ctx.translate(screenX, screenY);
+        // Rotate hook based on direction
+        const angle = Math.atan2(this.vy, this.vx);
+        ctx.rotate(angle);
+        
+        ctx.fillStyle = '#aaa';
+        ctx.beginPath();
+        ctx.moveTo(0, -5);
+        ctx.lineTo(20, 0); // Tip
+        ctx.lineTo(0, 5);
+        ctx.lineTo(5, 0);
+        ctx.fill();
+        
+        ctx.restore();
+    }
+}
+
+class Hero {
     constructor(x, y, isPlayer) {
         this.x = x;
         this.y = y;
         this.isPlayer = isPlayer;
-        this.radius = PLAYER_RADIUS;
-        this.angle = isPlayer ? 0 : Math.PI;
-        this.hp = 100;
-        this.maxHp = 100;
-        this.gold = 0;
-        this.speed = MOVE_SPEED_BASE;
-        this.items = { blink: false, force: false, heart: false };
-        this.hook = { active: false, x: 0, y: 0, vx: 0, vy: 0, target: null };
-        this.cooldown = 0;
-        this.kills = 0;
+        this.radius = 25;
+        this.angle = 0;
+        this.speed = 180; // Normalized speed
+        this.maxHp = 600;
+        this.hp = 600;
         this.dead = false;
         this.respawnTimer = 0;
         
-        // Visual offsets for animation
-        this.walkOffset = 0;
-    }
-
-    update() {
-        if (this.dead) {
-            this.respawnTimer--;
-            if (this.respawnTimer <= 0) {
-                this.respawn();
-            }
-            return;
-        }
-
-        // Cooldowns
-        if (this.cooldown > 0) this.cooldown--;
-
-        // Movement Logic
-        let dx = 0, dy = 0;
-        if (this.isPlayer) {
-            if (keys.w) dy = -1;
-            if (keys.s) dy = 1;
-            if (keys.a) dx = -1;
-            if (keys.d) dx = 1;
-            
-            // Aim angle
-            this.angle = Math.atan2(mouse.y - this.y, mouse.x - this.x);
-        } else {
-            // Simple Bot AI
-            const distToPlayer = Math.hypot(player.x - this.x, player.y - this.y);
-            const angleToPlayer = Math.atan2(player.y - this.y, player.x - this.x);
-            
-            // Stay on own side of river
-            const safeY = this.y < RIVER_Y ? RIVER_Y - 60 : RIVER_Y + RIVER_H + 60;
-            
-            // Move towards player if safe, else kite
-            if (!player.dead && distToPlayer < HOOK_RANGE * 0.8) {
-                // Try to dodge hook if player has it ready
-                if (player.cooldown === 0 && distToPlayer < 300) {
-                    // Panic move perpendicular
-                    dx = Math.cos(angleToPlayer + Math.PI/2);
-                    dy = Math.sin(angleToPlayer + Math.PI/2);
-                } else {
-                    dx = Math.cos(angleToPlayer);
-                    dy = Math.sin(angleToPlayer);
-                }
-            } else {
-                // Return to lane
-                dx = 0;
-                dy = (safeY - this.y) > 0 ? 0.5 : -0.5;
-            }
-            this.angle = angleToPlayer;
-        }
-
-        // Normalize movement
-        if (dx !== 0 || dy !== 0) {
-            const len = Math.hypot(dx, dy);
-            dx /= len;
-            dy /= len;
-            
-            let nextX = this.x + dx * this.speed;
-            let nextY = this.y + dy * this.speed;
-
-            // Map Boundaries
-            nextX = Math.max(this.radius, Math.min(MAP_WIDTH - this.radius, nextX));
-            nextY = Math.max(this.radius, Math.min(MAP_HEIGHT - this.radius, nextY));
-
-            // River Collision
-            const inRiverY = nextY > RIVER_Y && nextY < RIVER_Y + RIVER_H;
-            if (inRiverY) {
-                // Push back to nearest side
-                if (this.y < RIVER_Y) nextY = RIVER_Y - this.radius;
-                else nextY = RIVER_Y + RIVER_H + this.radius;
-            }
-
-            this.x = nextX;
-            this.y = nextY;
-            
-            // Animation bobbing
-            this.walkOffset = Math.sin(Date.now() / 100) * 3;
-        } else {
-            this.walkOffset = 0;
-        }
-
-        // Hook Logic
-        if (this.hook.active) {
-            this.hook.x += this.hook.vx;
-            this.hook.y += this.hook.vy;
-            
-            // Check distance
-            const startDist = Math.hypot(this.hook.x - this.x, this.hook.y - this.y);
-            if (startDist > HOOK_RANGE) {
-                this.resetHook();
-            }
-
-            // Check Collision with Enemy
-            const target = this.isPlayer ? bot : player;
-            if (!target.dead) {
-                const dist = Math.hypot(this.hook.x - target.x, this.hook.y - target.y);
-                if (dist < target.radius + 10) {
-                    this.hitHook(target);
-                }
-            }
-        }
-    }
-
-    tryHook() {
-        if (this.dead || this.cooldown > 0) return;
+        this.hook = new Hook(this);
         
-        this.hook.active = true;
-        this.hook.x = this.x;
-        this.hook.y = this.y;
-        this.hook.vx = Math.cos(this.angle) * HOOK_SPEED;
-        this.hook.vy = Math.sin(this.angle) * HOOK_SPEED;
-        this.cooldown = 120; // 2 seconds at 60fps
-    }
-
-    hitHook(target) {
-        this.hook.active = false;
-        this.hook.target = target;
-        
-        // Pull logic handled in draw/update loop for smoothness
-        setTimeout(() => {
-            if (this.hook.target === target) {
-                this.pullTarget(target);
-            }
-        }, 200); // Delay before pull
-    }
-
-    pullTarget(target) {
-        if (target.dead) return;
-        
-        // Drag enemy to self
-        const drag = () => {
-            if (!this.hook.target || this.dead || target.dead) return;
-            
-            const dx = this.x - target.x;
-            const dy = this.y - target.y;
-            const dist = Math.hypot(dx, dy);
-            
-            if (dist > 10) {
-                target.x += dx * 0.15;
-                target.y += dy * 0.15;
-                requestAnimationFrame(drag);
-            } else {
-                // Damage on impact
-                target.takeDamage(30);
-                this.hook.target = null;
-                
-                // Kill check
-                if (target.dead) {
-                    this.kills++;
-                    this.gold += 500;
-                    updateUI();
-                    spawnParticle(target.x, target.y, 'blood');
-                }
-            }
-        };
-        drag();
-    }
-
-    resetHook() {
-        this.hook.active = false;
-        this.hook.target = null;
+        // Items
+        this.hasBlink = false;
+        this.hasForce = false;
+        this.blinkCd = 0;
+        this.forceCd = 0;
     }
 
     takeDamage(amount) {
+        if (this.dead) return;
         this.hp -= amount;
         if (this.hp <= 0) {
-            this.hp = 0;
             this.die();
         }
         updateUI();
@@ -536,366 +464,383 @@ class Entity {
 
     die() {
         this.dead = true;
-        this.respawnTimer = 180; // 3 seconds
-        spawnParticle(this.x, this.y, 'death');
+        this.respawnTimer = 5; // Seconds
+        
+        // Explosion particles
+        for(let i=0; i<30; i++) {
+            particles.push(new Particle(this.x, this.y, '#800000', 8, 1.0));
+        }
+
         if (!this.isPlayer) {
-            player.gold += 200; // Bounty
+            gold += 500;
+            kills++;
+            showMessage("YOU KILLED ENEMY!");
             updateUI();
+        } else {
+            showMessage("YOU DIED!");
         }
     }
 
     respawn() {
         this.dead = false;
         this.hp = this.maxHp;
-        // Spawn on opposite sides
         this.x = this.isPlayer ? 200 : MAP_WIDTH - 200;
-        this.y = this.isPlayer ? 150 : MAP_HEIGHT - 150;
+        this.y = MAP_HEIGHT / 2;
         updateUI();
     }
 
-    draw(ctx) {
+    tryHook() {
+        if (this.hook.active || this.dead) return;
+        this.hook.fire(this.x, this.y, mouse.x + camera.x, mouse.y + camera.y);
+    }
+
+    useBlink() {
+        if (this.blinkCd > 0 || this.dead) return;
+        this.x = mouse.x + camera.x;
+        this.y = mouse.y + camera.y;
+        this.blinkCd = 12;
+        // Blink particles
+        for(let i=0; i<15; i++) {
+            particles.push(new Particle(this.x, this.y, '#00ffff', 6, 0.4));
+        }
+    }
+
+    useForce() {
+        if (this.forceCd > 0 || this.dead) return;
+        const angle = Math.atan2(mouse.y + camera.y - this.y, mouse.x + camera.x - this.x);
+        this.x += Math.cos(angle) * 200;
+        this.y += Math.sin(angle) * 200;
+        this.forceCd = 10;
+    }
+
+    update(dt) {
         if (this.dead) {
-            // Draw Death Cross
-            ctx.save();
-            ctx.translate(this.x, this.y);
-            ctx.strokeStyle = '#555';
-            ctx.lineWidth = 4;
-            ctx.beginPath();
-            ctx.moveTo(-15, -15); ctx.lineTo(15, 15);
-            ctx.moveTo(15, -15); ctx.lineTo(-15, 15);
-            ctx.stroke();
-            ctx.restore();
+            this.respawnTimer -= dt;
+            if (this.respawnTimer <= 0) this.respawn();
             return;
         }
 
-        ctx.save();
-        ctx.translate(this.x, this.y + this.walkOffset);
-        
-        // Rotate towards aim/movement
-        // If moving, face movement direction, else face mouse
-        let renderAngle = this.angle;
-        if (!this.isPlayer && Math.abs(this.walkOffset) > 0.1) {
-             // Bot faces movement
+        // Cooldowns
+        if (this.blinkCd > 0) this.blinkCd -= dt;
+        if (this.forceCd > 0) this.forceCd -= dt;
+
+        // Movement
+        let dx = 0;
+        let dy = 0;
+
+        if (this.isPlayer) {
+            if (keys['KeyW']) dy = -1;
+            if (keys['KeyS']) dy = 1;
+            if (keys['KeyA']) dx = -1;
+            if (keys['KeyD']) dx = 1;
+            
+            // Auto-rotate to mouse
+            this.angle = Math.atan2((mouse.y + camera.y) - this.y, (mouse.x + camera.x) - this.x);
+
+            // Items Hotkeys (Optional, mainly click in shop but let's add shortcuts)
+            if (keys['KeyQ'] && this.hasBlink) this.useBlink();
+            if (keys['KeyE'] && this.hasForce) this.useForce();
+
+        } else {
+            // Simple AI
+            const distToPlayer = getDist(this.x, this.y, player.x, player.y);
+            const angleToPlayer = Math.atan2(player.y - this.y, player.x - this.x);
+            
+            // Move towards player if far, back if too close
+            if (distToPlayer > 400) {
+                dx = Math.cos(angleToPlayer);
+                dy = Math.sin(angleToPlayer);
+            } else if (distToPlayer < 200) {
+                dx = -Math.cos(angleToPlayer);
+                dy = -Math.sin(angleToPlayer);
+            }
+            
+            this.angle = angleToPlayer;
+
+            // AI Hook logic
+            if (!this.hook.active && distToPlayer < 600 && Math.random() < 0.02) {
+                this.hook.fire(this.x, this.y, player.x, player.y);
+            }
         }
-        ctx.rotate(renderAngle);
+
+        // Normalize vector
+        if (dx !== 0 || dy !== 0) {
+            const len = Math.sqrt(dx*dx + dy*dy);
+            dx /= len;
+            dy /= len;
+            
+            const nextX = this.x + dx * this.speed * dt;
+            const nextY = this.y + dy * this.speed * dt;
+
+            // River Collision
+            if (!(nextY > RIVER_Y_START && nextY < RIVER_Y_END)) {
+                this.x = nextX;
+                this.y = nextY;
+            }
+            
+            // Map Bounds
+            this.x = Math.max(this.radius, Math.min(MAP_WIDTH - this.radius, this.x));
+            this.y = Math.max(this.radius, Math.min(MAP_HEIGHT - this.radius, this.y));
+        }
+
+        this.hook.update(dt, this.isPlayer ? bot : player);
+    }
+
+    draw(ctx, camX, camY) {
+        if (this.dead) return;
+
+        const sx = this.x - camX;
+        const sy = this.y - camY;
+
+        ctx.save();
+        ctx.translate(sx, sy);
+        ctx.rotate(this.angle);
 
         // --- DRAW PUDGE MODEL ---
         
-        // 1. Back Arm (Left)
-        ctx.fillStyle = COLORS.skin;
+        // Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.5)';
         ctx.beginPath();
-        ctx.arc(-10, 15, 12, 0, Math.PI*2); 
+        ctx.ellipse(0, 15, 20, 10, 0, 0, Math.PI*2);
         ctx.fill();
 
-        // 2. Body (Belly)
-        ctx.fillStyle = '#4a6b52'; // Darker green for belly
+        // Back Arm (Left)
+        ctx.fillStyle = '#5c4033'; // Skin
+        ctx.beginPath();
+        ctx.arc(-15, 10, 12, 0, Math.PI*2);
+        ctx.fill();
+
+        // Body (Big Belly)
+        ctx.fillStyle = '#6b8c42'; // Green apron/skin mix
         ctx.beginPath();
         ctx.ellipse(0, 0, 22, 26, 0, 0, Math.PI*2);
         ctx.fill();
-        ctx.strokeStyle = '#2a3b2e';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        // Apron/Belt
-        ctx.fillStyle = COLORS.apron;
-        ctx.fillRect(-15, 5, 30, 15);
-        ctx.strokeStyle = '#221100';
-        ctx.strokeRect(-15, 5, 30, 15);
-
-        // 3. Head
-        ctx.fillStyle = COLORS.skin;
-        ctx.beginPath();
-        ctx.arc(0, -20, 16, 0, Math.PI*2);
-        ctx.fill();
         
-        // Mask details
+        // Apron detail
+        ctx.fillStyle = '#4a632d';
+        ctx.beginPath();
+        ctx.moveTo(-15, -10);
+        ctx.quadraticCurveTo(0, 20, 15, -10);
+        ctx.lineTo(10, -20);
+        ctx.lineTo(-10, -20);
+        ctx.fill();
+
+        // Shoulders/Straps
         ctx.fillStyle = '#333';
-        ctx.beginPath();
-        ctx.moveTo(-5, -25); ctx.lineTo(5, -25); ctx.lineTo(0, -15);
-        ctx.fill();
-        // Eyes
-        ctx.fillStyle = '#fff';
-        ctx.beginPath(); ctx.arc(-6, -22, 3, 0, Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.arc(6, -22, 3, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = '#f00'; // Red pupils
-        ctx.beginPath(); ctx.arc(-6, -22, 1, 0, Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.arc(6, -22, 1, 0, Math.PI*2); ctx.fill();
+        ctx.fillRect(-18, -25, 8, 15);
+        ctx.fillRect(10, -25, 8, 15);
 
-        // 4. Front Arm (Right) + Hook
-        ctx.fillStyle = COLORS.skin;
+        // Head
+        ctx.fillStyle = '#5c4033';
         ctx.beginPath();
-        ctx.arc(10, 15, 12, 0, Math.PI*2);
+        ctx.arc(0, -25, 16, 0, Math.PI*2);
         ctx.fill();
 
-        // Shoulder pad
-        ctx.fillStyle = '#554433';
+        // Mask / Face details
+        ctx.fillStyle = '#222'; // Mouth guard
         ctx.beginPath();
-        ctx.arc(12, 5, 8, 0, Math.PI*2);
+        ctx.moveTo(-10, -20);
+        ctx.lineTo(10, -20);
+        ctx.lineTo(5, -10);
+        ctx.lineTo(-5, -10);
         ctx.fill();
 
-        // Hook Chain (if active or idle)
-        ctx.strokeStyle = '#444';
-        ctx.lineWidth = 2;
+        // Eyes (Glowing)
+        ctx.fillStyle = '#ffaa00';
         ctx.beginPath();
-        ctx.moveTo(15, 15);
-        if (this.hook.active) {
-            // Calculate hook pos relative to rotation
-            // This is tricky with rotation, simplifying: draw hook in world space later
-        } else {
-            ctx.lineTo(25, 25); // Idle hook pos
-        }
-        ctx.stroke();
+        ctx.arc(-6, -28, 3, 0, Math.PI*2);
+        ctx.arc(6, -28, 3, 0, Math.PI*2);
+        ctx.fill();
 
-        // The Hook Head
-        ctx.save();
-        if (this.hook.active) {
-            // Draw hook at world coordinates transformed to local? No, easier to draw hook separately in world space
-            ctx.restore(); // Restore to world space for hook drawing
-            this.drawHookWorld(ctx);
-            ctx.save(); // Save again to restore rotation for body
-            ctx.translate(this.x, this.y + this.walkOffset);
-            ctx.rotate(renderAngle);
-        } else {
-            // Draw idle hook
-            ctx.translate(25, 25);
-            ctx.fillStyle = COLORS.metal;
-            ctx.beginPath();
-            ctx.moveTo(0,0); ctx.lineTo(10, -5); ctx.lineTo(15, 5); ctx.lineTo(5, 10);
-            ctx.fill();
-            ctx.strokeStyle = '#222';
-            ctx.stroke();
-        }
+        // Front Arm (Right) holding hook chain base
+        ctx.fillStyle = '#5c4033';
+        ctx.beginPath();
+        ctx.arc(15, 10, 12, 0, Math.PI*2);
+        ctx.fill();
+
         ctx.restore();
-    }
 
-    drawHookWorld(ctx) {
-        if (!this.hook.active) return;
-        
-        // Draw Chain
-        ctx.strokeStyle = '#555';
-        ctx.lineWidth = 3;
-        ctx.setLineDash([5, 5]);
-        ctx.beginPath();
-        ctx.moveTo(this.x, this.y);
-        ctx.lineTo(this.hook.x, this.hook.y);
-        ctx.stroke();
-        ctx.setLineDash([]);
+        // Draw Hook separately so it's not rotated weirdly if needed, 
+        // but inside save/restore allows it to rotate with body naturally
+        this.hook.draw(ctx, camX, camY);
 
-        // Draw Hook Head
-        ctx.save();
-        ctx.translate(this.hook.x, this.hook.y);
-        ctx.rotate(Math.atan2(this.hook.vy, this.hook.vx));
-        
-        ctx.fillStyle = '#aaa';
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(20, -8);
-        ctx.lineTo(25, 0);
-        ctx.lineTo(20, 8);
-        ctx.lineTo(5, 5); // Barb
-        ctx.closePath();
-        ctx.fill();
-        ctx.strokeStyle = '#333';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        
-        ctx.restore();
+        // HP Bar above head
+        if (this.hp < this.maxHp) {
+            const barW = 40;
+            const barH = 4;
+            ctx.fillStyle = '#000';
+            ctx.fillRect(sx - barW/2, sy - 50, barW, barH);
+            ctx.fillStyle = '#0f0';
+            ctx.fillRect(sx - barW/2, sy - 50, barW * (this.hp / this.maxHp), barH);
+        }
     }
 }
 
-// Particles System
+// --- GAME LOOP ---
+
+const player = new Hero(200, MAP_HEIGHT/2, true);
+const bot = new Hero(MAP_WIDTH - 200, MAP_HEIGHT/2, false);
 let particles = [];
-function spawnParticle(x, y, type) {
-    const count = type === 'blood' ? 20 : 50;
-    for(let i=0; i<count; i++) {
-        particles.push({
-            x: x, y: y,
-            vx: (Math.random() - 0.5) * 10,
-            vy: (Math.random() - 0.5) * 10,
-            life: 1.0,
-            color: type === 'blood' ? '#8a0b0b' : '#ffd700',
-            size: Math.random() * 4 + 2
-        });
-    }
-}
-
-function updateParticles() {
-    for (let i = particles.length - 1; i >= 0; i--) {
-        let p = particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.life -= 0.02;
-        if (p.life <= 0) particles.splice(i, 1);
-    }
-}
-
-function drawParticles(ctx) {
-    particles.forEach(p => {
-        ctx.globalAlpha = p.life;
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
-        ctx.fill();
-        ctx.globalAlpha = 1.0;
-    });
-}
-
-// Shop System
-const shopItems = [
-    { id: 'blink', name: 'Blink Dagger', price: 2250, iconColor: '#00ffff' },
-    { id: 'force', name: 'Force Staff', price: 2200, iconColor: '#90ee90' },
-    { id: 'heart', name: 'Heart of Tarrasque', price: 5000, iconColor: '#ff0000' }
-];
-
-function initShop() {
-    const container = document.querySelector('.shop-container');
-    container.innerHTML = '';
-    shopItems.forEach(item => {
-        const el = document.createElement('div');
-        el.className = 'shop-item';
-        el.id = `item-${item.id}`;
-        el.onclick = () => buyItem(item.id);
-        
-        // Generate Vector Icon
-        const svg = `
-            <svg class="item-icon" viewBox="0 0 40 40">
-                ${getItemSVG(item.id, item.iconColor)}
-            </svg>
-        `;
-        
-        el.innerHTML = `
-            ${svg}
-            <div class="item-price">${item.price}</div>
-            <div class="item-name">${item.name}</div>
-        `;
-        container.appendChild(el);
-    });
-}
-
-function getItemSVG(id, color) {
-    if (id === 'blink') {
-        // Dagger shape
-        return `<path d="M20 5 L25 20 L20 35 L15 20 Z M20 2 L20 38" stroke="${color}" fill="none" stroke-width="2"/>`;
-    } else if (id === 'force') {
-        // Staff shape
-        return `<rect x="18" y="5" width="4" height="30" fill="${color}"/><circle cx="20" cy="10" r="4" fill="#fff"/>`;
-    } else if (id === 'heart') {
-        // Heart shape
-        return `<path d="M20 35 C5 25 5 10 12 5 C16 2 20 5 20 5 C20 5 24 2 28 5 C35 10 35 25 20 35" fill="${color}" stroke="#500" stroke-width="1"/>`;
-    }
-    return '';
-}
-
-function buyItem(itemId) {
-    const item = shopItems.find(i => i.id === itemId);
-    if (player.items[itemId]) return; // Already owned
-    
-    if (player.gold >= item.price) {
-        player.gold -= item.price;
-        player.items[itemId] = true;
-        
-        // Apply effects
-        if (itemId === 'heart') {
-            player.maxHp += 200;
-            player.hp += 200;
-        } else if (itemId === 'blink') {
-            player.speed += 1.0; // Temporary speed boost for demo
-        }
-        
-        updateUI();
-        document.getElementById(`item-${itemId}`).classList.add('owned');
-    } else {
-        // Not enough gold visual feedback
-        const el = document.getElementById(`item-${itemId}`);
-        el.style.borderColor = 'red';
-        setTimeout(() => el.style.borderColor = '#555', 200);
-    }
-}
+let camera = { x: 0, y: 0 };
 
 function updateUI() {
-    document.getElementById('playerHp').style.width = `${(player.hp / player.maxHp) * 100}%`;
-    document.getElementById('playerGold').innerText = Math.floor(player.gold);
-    document.getElementById('scoreVal').innerText = player.kills;
+    document.getElementById('playerHp').style.width = (player.hp / player.maxHp * 100) + '%';
+    document.getElementById('goldAmount').innerText = Math.floor(gold);
+    document.getElementById('killScore').innerText = kills;
+
+    // Update shop buttons state
+    const items = [
+        {id: 'blink', cost: 2200, has: player.hasBlink},
+        {id: 'force', cost: 2250, has: player.hasForce},
+        {id: 'heart', cost: 5000, has: false} // Heart consumed
+    ];
+
+    items.forEach(item => {
+        const btn = document.getElementById(`btn-${item.id}`);
+        if (!btn) return;
+        
+        if (item.has) {
+            btn.classList.add('disabled');
+            btn.querySelector('.item-price').innerText = "OWNED";
+        } else if (gold < item.cost) {
+            btn.classList.add('disabled');
+        } else {
+            btn.classList.remove('disabled');
+            btn.querySelector('.item-price').innerText = item.cost;
+        }
+    });
 }
 
-// Initialization
-const player = new Entity(200, 150, true);
-const bot = new Entity(MAP_WIDTH - 200, MAP_HEIGHT - 150, false);
+function showMessage(text) {
+    const el = document.getElementById('message-area');
+    el.innerText = text;
+    el.style.opacity = 1;
+    gameMessageTimer = 2.0;
+}
 
-initShop();
-
-// Main Loop
-function loop() {
-    // Clear
-    ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Camera Transform (Center on player roughly, but clamped)
-    ctx.save();
+function buyItem(type) {
+    if (player.dead) return;
     
-    // Simple follow camera
-    let camX = -player.x + canvas.width / 2;
-    let camY = -player.y + canvas.height / 2;
-    
-    // Clamp camera to map bounds
-    camX = Math.min(0, Math.max(camX, -(MAP_WIDTH - canvas.width)));
-    camY = Math.min(0, Math.max(camY, -(MAP_HEIGHT - canvas.height)));
-    
-    // If screen is smaller than map, apply transform. If larger, center map.
-    if (canvas.width < MAP_WIDTH || canvas.height < MAP_HEIGHT) {
-        ctx.translate(camX, camY);
-    } else {
-        ctx.translate((canvas.width - MAP_WIDTH)/2, (canvas.height - MAP_HEIGHT)/2);
+    if (type === 'blink' && !player.hasBlink && gold >= 2200) {
+        gold -= 2200;
+        player.hasBlink = true;
+        updateUI();
+    } else if (type === 'force' && !player.hasForce && gold >= 2250) {
+        gold -= 2250;
+        player.hasForce = true;
+        updateUI();
+    } else if (type === 'heart' && gold >= 5000) {
+        gold -= 5000;
+        player.maxHp += 500;
+        player.hp += 500;
+        updateUI();
     }
+}
 
-    // Draw Map Background
-    ctx.fillStyle = COLORS.grass;
-    ctx.fillRect(0, 0, MAP_WIDTH, MAP_HEIGHT);
-    
-    // Grid pattern for texture
-    ctx.strokeStyle = COLORS.grassDark;
+// Expose to window for HTML onclick
+window.buyItem = buyItem;
+
+function drawMap(ctx, camX, camY) {
+    // Grass
+    ctx.fillStyle = '#2d4a1e';
+    ctx.fillRect(-camX, -camY, canvas.width, canvas.height);
+
+    // Grid pattern for texture feel
+    ctx.strokeStyle = '#3a5f28';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    for(let x=0; x<=MAP_WIDTH; x+=100) { ctx.moveTo(x,0); ctx.lineTo(x, MAP_HEIGHT); }
-    for(let y=0; y<=MAP_HEIGHT; y+=100) { ctx.moveTo(0,y); ctx.lineTo(MAP_WIDTH, y); }
-    ctx.stroke();
-
-    // Draw River
-    ctx.fillStyle = COLORS.river;
-    ctx.fillRect(0, RIVER_Y, MAP_WIDTH, RIVER_H);
-    // River banks
-    ctx.fillStyle = '#4e342e';
-    ctx.fillRect(0, RIVER_Y - 5, MAP_WIDTH, 5);
-    ctx.fillRect(0, RIVER_Y + RIVER_H, MAP_WIDTH, 5);
-    // Water flow effect
-    ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-    ctx.beginPath();
-    const offset = (Date.now() / 20) % 50;
-    for(let i=-50; i<MAP_WIDTH+50; i+=50) {
-        ctx.moveTo(i + offset, RIVER_Y + 10);
-        ctx.lineTo(i + offset - 20, RIVER_Y + 70);
+    const gridSize = 100;
+    const offsetX = -camX % gridSize;
+    const offsetY = -camY % gridSize;
+    
+    for (let x = offsetX; x < canvas.width; x += gridSize) {
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+    }
+    for (let y = offsetY; y < canvas.height; y += gridSize) {
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
     }
     ctx.stroke();
 
-    // Update & Draw Entities
-    player.update();
-    bot.update();
+    // River
+    const riverScreenY = RIVER_Y_START - camY;
+    const riverHeight = RIVER_Y_END - RIVER_Y_START;
     
-    // Draw order: lower Y first (pseudo-3d depth)
-    const entities = [player, bot].sort((a,b) => a.y - b.y);
-    entities.forEach(e => e.draw(ctx));
+    // River Water
+    ctx.fillStyle = '#3366cc';
+    ctx.fillRect(0, riverScreenY, canvas.width, riverHeight);
+    
+    // River Banks
+    ctx.fillStyle = '#5d4037';
+    ctx.fillRect(0, riverScreenY - 10, canvas.width, 10);
+    ctx.fillRect(0, riverScreenY + riverHeight, canvas.width, 10);
+
+    // River Flow effect (simple lines)
+    ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+    ctx.lineWidth = 2;
+    const timeOffset = Date.now() / 1000;
+    for(let i=0; i<canvas.width; i+= 60) {
+        let x = (i + timeOffset * 50) % canvas.width;
+        if (x < 0) x += canvas.width;
+        ctx.beginPath();
+        ctx.moveTo(x, riverScreenY + 10);
+        ctx.lineTo(x + 20, riverScreenY + 10);
+        ctx.stroke();
+    }
+}
+
+function loop(timestamp) {
+    const dt = Math.min((timestamp - lastTime) / 1000, 0.1);
+    lastTime = timestamp;
+
+    // Update Logic
+    player.update(dt);
+    bot.update(dt);
 
     // Particles
-    updateParticles();
-    drawParticles(ctx);
+    for (let i = particles.length - 1; i >= 0; i--) {
+        particles[i].update(dt);
+        if (particles[i].life <= 0) particles.splice(i, 1);
+    }
 
-    ctx.restore();
+    // Message Timer
+    if (gameMessageTimer > 0) {
+        gameMessageTimer -= dt;
+        if (gameMessageTimer <= 0) {
+            document.getElementById('message-area').style.opacity = 0;
+        }
+    }
+
+    // Camera Follow Player (Smooth)
+    const targetCamX = player.x - canvas.width / 2;
+    const targetCamY = player.y - canvas.height / 2;
+    camera.x += (targetCamX - camera.x) * 0.1;
+    camera.y += (targetCamY - camera.y) * 0.1;
+
+    // Clamp Camera
+    camera.x = Math.max(0, Math.min(camera.x, MAP_WIDTH - canvas.width));
+    camera.y = Math.max(0, Math.min(camera.y, MAP_HEIGHT - canvas.height));
+
+    // Render
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    drawMap(ctx, camera.x, camera.y);
+
+    // Draw entities sorted by Y for pseudo-depth
+    const entities = [player, bot];
+    entities.sort((a, b) => a.y - b.y);
+    
+    entities.forEach(e => e.draw(ctx, camera.x, camera.y));
+
+    particles.forEach(p => p.draw(ctx, camera.x, camera.y));
 
     requestAnimationFrame(loop);
 }
 
 // Start
-loop();
+updateUI();
+requestAnimationFrame(loop);
 
 </script>
 </body>
