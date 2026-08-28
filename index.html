@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Портфолио | Конвертер валют</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .converter-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-weight: 600;
+            color: #555;
+            font-size: 14px;
+        }
+
+        input[type="number"] {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        select {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .exchange-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .exchange-row .form-group {
+            flex: 1;
+        }
+
+        .swap-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .swap-btn:hover {
+            background: #5568d3;
+            transform: rotate(180deg);
+        }
+
+        .convert-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .convert-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .result {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .result-label {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .result-value {
+            color: #333;
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .result-currency {
+            color: #667eea;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .rate-info {
+            color: #999;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            .exchange-row {
+                flex-direction: column;
+            }
+
+            .swap-btn {
+                margin-top: 0;
+                transform: rotate(90deg);
+            }
+
+            .swap-btn:hover {
+                transform: rotate(270deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💱 Конвертер валют</h1>
+        <p class="subtitle">Быстрый и точный обмен валют</p>
+
+        <form class="converter-form" id="converterForm">
+            <div class="form-group">
+                <label for="amount">Сумма</label>
+                <input type="number" id="amount" value="1" min="0" step="any" required>
+            </div>
+
+            <div class="exchange-row">
+                <div class="form-group">
+                    <label for="fromCurrency">Из валюты</label>
+                    <select id="fromCurrency"></select>
+                </div>
+
+                <button type="button" class="swap-btn" id="swapBtn" title="Поменять местами">
+                    ⇄
+                </button>
+
+                <div class="form-group">
+                    <label for="toCurrency">В валюту</label>
+                    <select id="toCurrency"></select>
+                </div>
+            </div>
+
+            <button type="submit" class="convert-btn">Конвертировать</button>
+        </form>
+
+        <div class="result" id="result" style="display: none;">
+            <div class="result-label">Результат конвертации:</div>
+            <div class="result-value" id="resultValue">0</div>
+            <div class="result-currency" id="resultCurrency"></div>
+            <div class="rate-info" id="rateInfo"></div>
+        </div>
+    </div>
+
+    <script>
+        // Курсы валют относительно USD
+        const exchangeRates = {
+            USD: 1.0,
+            EUR: 0.85,
+            GBP: 0.73,
+            JPY: 110.0,
+            CNY: 6.45,
+            RUB: 74.5,
+            KZT: 425.0,
+            UAH: 27.5,
+            BYN: 2.52,
+            CHF: 0.92,
+            CAD: 1.25,
+            AUD: 1.35,
+            INR: 74.5,
+            BRL: 5.25,
+            TRY: 8.75,
+            KRW: 1180.0,
+            SGD: 1.35,
+            PLN: 3.95,
+            SEK: 8.75,
+            NOK: 8.95
+        };
+
+        const currencyNames = {
+            USD: '🇺🇸 Доллар США',
+            EUR: '🇪🇺 Евро',
+            GBP: '🇬🇧 Фунт стерлингов',
+            JPY: '🇯🇵 Японская иена',
+            CNY: '🇨🇳 Китайский юань',
+            RUB: '🇷🇺 Российский рубль',
+            KZT: '🇰🇿 Казахский тенге',
+            UAH: '🇺🇦 Украинская гривна',
+            BYN: '🇧🇾 Белорусский рубль',
+            CHF: '🇨🇭 Швейцарский франк',
+            CAD: '🇨🇦 Канадский доллар',
+            AUD: '🇦🇺 Австралийский доллар',
+            INR: '🇮🇳 Индийская рупия',
+            BRL: '🇧🇷 Бразильский реал',
+            TRY: '🇹🇷 Турецкая лира',
+            KRW: '🇰🇷 Южнокорейская вона',
+            SGD: '🇸🇬 Сингапурский доллар',
+            PLN: '🇵🇱 Польский злотый',
+            SEK: '🇸🇪 Шведская крона',
+            NOK: '🇳🇴 Норвежская крона'
+        };
+
+        const fromCurrencySelect = document.getElementById('fromCurrency');
+        const toCurrencySelect = document.getElementById('toCurrency');
+        const amountInput = document.getElementById('amount');
+        const swapBtn = document.getElementById('swapBtn');
+        const converterForm = document.getElementById('converterForm');
+        const resultDiv = document.getElementById('result');
+        const resultValue = document.getElementById('resultValue');
+        const resultCurrency = document.getElementById('resultCurrency');
+        const rateInfo = document.getElementById('rateInfo');
+
+        // Заполнение селектов валютами
+        function populateCurrencies() {
+            Object.keys(exchangeRates).forEach(currency => {
+                const option1 = document.createElement('option');
+                option1.value = currency;
+                option1.textContent = currencyNames[currency];
+
+                const option2 = document.createElement('option');
+                option2.value = currency;
+                option2.textContent = currencyNames[currency];
+
+                fromCurrencySelect.appendChild(option1);
+                toCurrencySelect.appendChild(option2);
+            });
+
+            // Установить значения по умолчанию
+            fromCurrencySelect.value = 'USD';
+            toCurrencySelect.value = 'EUR';
+        }
+
+        // Конвертация валюты
+        function convertCurrency() {
+            const amount = parseFloat(amountInput.value);
+            const from = fromCurrencySelect.value;
+            const to = toCurrencySelect.value;
+
+            if (isNaN(amount) || amount < 0) {
+                alert('Пожалуйста, введите корректную сумму');
+                return;
+            }
+
+            // Конвертация через USD
+            const amountInUSD = amount / exchangeRates[from];
+            const convertedAmount = amountInUSD * exchangeRates[to];
+            const rate = exchangeRates[to] / exchangeRates[from];
+
+            // Отображение результата
+            resultValue.textContent = convertedAmount.toFixed(2);
+            resultCurrency.textContent = to;
+            rateInfo.textContent = `1 ${from} = ${rate.toFixed(4)} ${to}`;
+            resultDiv.style.display = 'block';
+        }
+
+        // Поменять валюты местами
+        function swapCurrencies() {
+            const temp = fromCurrencySelect.value;
+            fromCurrencySelect.value = toCurrencySelect.value;
+            toCurrencySelect.value = temp;
+
+            // Анимация кнопки
+            swapBtn.style.transform = 'rotate(180deg)';
+            setTimeout(() => {
+                swapBtn.style.transform = 'rotate(0deg)';
+            }, 300);
+
+            // Автоматическая конвертация после смены
+            if (resultDiv.style.display === 'block') {
+                convertCurrency();
+            }
+        }
+
+        // Обработчики событий
+        converterForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            convertCurrency();
+        });
+
+        swapBtn.addEventListener('click', swapCurrencies);
+
+        // Инициализация
+        populateCurrencies();
+    </script>
+</body>
+</html>
